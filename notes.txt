@@ -1,0 +1,185 @@
+Node js uses the Observer pattern https://en.wikipedia.org/wiki/Observer_pattern whereby an object or subject maintains a list of its dependents (or observers).
+This might be called a 'collection'. Dependents are registered into the collection using object methods. e.g The object may have the following methods:
+
+registerObserver(observer)
+unregisterObserver(observer)
+notifyObservers()
+
+Observers themselves are notified via a their own methods
+
+e.g notifyObservers(){
+	
+	for each observer in observerCollection
+	call observer.notify()
+} 
+
+======================================================
+
+Events
+
+======================================================
+
+Much of the core Node API is built around and asynchronous (occur at same time) event-driven architecture in which certain kinds of objects (called 'emitters') emit 
+named events that cause Function objects ("listeners") to be called.
+
+For example, a net.Server object emits an event each time a peer connects to it.
+
+All objects that emit events are instances of the EventEmitter class. These objects expose an eventEmitter.on() function that allows one or more functions to be attached
+to named events emitted by the object. Typically, event names are camel-cased strings but any valid JavaScript property key can be used.
+
+When the EventEmitter object emits an event, all of the functions attached to that specific event are called synchronously (consecutively). Any values returned by the called listeners are 
+ignored and will be discarded.
+
+The following shows a simple EventEmitter instance with a single listener. The eventEmitter.on() method is used to register listeners, while the eventEmitter.emit() method is used to trigger the event.
+
+//import the events module to use
+const EventEmitter = require('events');
+
+//base our emitter class on the EventEmitter 
+class MyEmitter extends EventEmitter {}
+
+//create an instance of our emitter class
+const myEmitter = new MyEmitter();
+
+//register a listener that is called when the event with the name 'event' is fired
+myEmitter.on('event', () => {
+	console.log('an event occured');
+});
+
+//emit an event called 'event';
+myEmitter.emit('event') 
+
+
+-------------------------------------
+
+Passing arguments and this to listeners
+
+The EventEmitter class is defined and exposed by the 'events' module
+
+const EventEmitter = require('events'); 
+
+
+The eventEmitter.emit() method allows an arbitrary set of arguments to be passed to the listener functions. It is important to keep in mind that when an ordinary listener function is called by the EventEmitter, the standard 'this' keyword is intentionally set to reference the EventEmitter to which the listener is attached.
+
+
+const myEmitter = new MyEmitter();
+
+myEmitter.on('event', function(a,b){
+	
+	console.log(a, b, this);
+
+	// Prints:
+	// a b MyEmitter{
+	//	domain: null,
+	//	_events: { event: [Function] },
+	//	_eventsCount: 1,
+	//	_maxListeners: undefined } 
+	
+})           
+
+myEmitter.emit('event', 'a', 'b');
+
+
+Is it possible to use ES6 Arrow Functions as listeners but the 'this' keyword will no longer refer to the EventEmitter
+
+const myEmitter = new MyEmitter();
+
+myEmitter.on('event', (a,b) => {
+	
+	console.log(a, b, this);
+	// Prints: a b {} 
+
+}); 
+
+myEmitter.emit('event', 'a', 'b');
+
+-----------------------------------
+
+Asynchronous vs Synchronous
+
+The EventListener calls all listeners synchronously ( one after the other see http://stackoverflow.com/questions/748175/asynchronous-vs-synchronous-execution-what-does-it-really-mean )  in the order in which they were registered. This is important to ensure the proper sequencing of events and to avoid race conditions or logic errors. When appropriate, listener functions can switch to an asynchronous mode of operation using the setImmediate() or process.nextTick() methods:
+
+const myEmitter = new MyEmitter();
+
+myEmitter.on('event', (a,b) => {
+	
+	setImmediate(() => {
+
+		console.log('this happens asyncgronously');
+	});
+
+});
+
+myEmitter.emit('event', 'a', 'b');
+
+----------------------------------
+
+Handling events only once
+
+When a listener is registered using the eventEmitter.on() method, that listener will be invoked every time the named event is emitted
+
+
+const myEmitter = new MyEmitter();
+
+var m = 0;
+
+myEmitter.on('event', () => {
+	console.log(++m);
+});
+
+myEmitter.emit('event');
+//Prints: 1
+myEmitter.emit('event');
+//Prints: 2
+
+
+Using the eventEmitter.once() method, it is possible to register a listener that is called at most once for a particular event. Once th eevent is emitted, the listener is unregistered and then called.   
+
+const myEmitter = new MyEmitter();
+
+var m = 0;
+
+myEmitter.once('event', () => {
+	console.log(++m);
+});
+
+myEmitter.emit('event');
+//Prints: 1
+myEmitter.emit('event');
+//Ignored
+
+Error events
+
+When an error occurs within an EventEmitter instance, the typical action is for an 'error' event to be emitted. These are treated as special cases within Node.js
+
+If an EventEmitter does not have at least one listener registered for the 'error' event, and an 'error' event is emitted, the error is thrown, a stack trace is printed, and the Node.js process exits
+
+To guard against crashing the Node.js process, a listener can be registered on the 'process' objects 'uncaughtException' event.
+
+const myEmitter = new MyEmitter();
+
+process.on('uncaughtException', (ee) => {
+	console.log('whoops! there was an error');
+});
+
+myEmitter.emit('error', new Error('whoops')); 
+// Prints: whoops! there was an error
+
+
+As a best practice, listeners should always be added for the 'error' events
+
+const myEmitter = new MyEmitter();
+myEmitter.on('error', (err) => {
+	console.log('whoops! there was an error');
+});
+
+myEmitter.emit('error', new Error('whoops!'))
+//Prints: whoops! there was an error
+
+
+
+
+
+
+
+
