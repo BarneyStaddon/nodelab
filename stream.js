@@ -29,6 +29,7 @@ var server = http.createServer(function(request, response){
 	readerStream.setEncoding('UTF8');
 	readerStream.on('data', function(chunk){
 		
+		//ignore the browser's second request for a favicon  
 		if(url !== "/favicon.ico") {
 
 			data += chunk; 
