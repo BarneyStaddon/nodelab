@@ -1,0 +1,23 @@
+{
+  "name": "nodelab",
+  "version": "1.0.0",
+  "description": "A node play playground",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BarneyStaddon/nodelab.git"
+  },
+  "author": "Barney Staddon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BarneyStaddon/nodelab/issues"
+  },
+  "homepage": "https://github.com/BarneyStaddon/nodelab#readme",
+  "devDependencies": {
+    "express": "^4.14.0"
+  }
+}
