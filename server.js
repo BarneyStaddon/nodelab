@@ -14,12 +14,65 @@
 */
 
 var http = require('http');
+var baseURL = 'http://fe01.museumoflondon.org.uk/solr/mol';
 
-//create a server, passing in a closure that is called whenever an http request comes in 
-var server = http.createServer(function(req, res){
-	res.writeHead(200);
-	res.end('Hello Http')
-})
+// options for GET
+var options = {
+    host : 'fe01.museumoflondon.org.uk', // here only the domain name
+    // (no http/https !)
+    port : 80,
+    path : '/solr/mol/select?q=borough:Camden&wt=json', // the rest of the url with parameters if needed
+    method : 'GET' // do GET
+};
+
+
+var server = http.createServer();
+
+
+function getJSON(nodeRes){
+
+
+	// do the GET request
+	var reqGet = http.request(options, function(res) {
+    	console.log("statusCode: ", res.statusCode);
+    	// uncomment it for header details
+		//  console.log("headers: ", res.headers);
+
+
+		var ourData = '';
+
+    	res.on('data', (d) => {
+        	
+        	console.log('Got some data');
+        	ourData += d;
+    	});
+
+
+    	res.on('end', () => {
+
+    		console.log('Got all data again');
+    		nodeRes.writeHead(200);
+			nodeRes.end(ourData);
+    	});
+
+	});
+
+	reqGet.end();
+	reqGet.on('error', (e) => {
+    	console.error(e);
+	});
+
+}
+
+
+server.on('request', function(req,res){
+
+	if (req.url != '/favicon.ico') {
+		getJSON(res);
+	}
+
+});
+
 
 //call listen on our server object to tell it what port we want it to listen for requests on
 server.listen(8080);
