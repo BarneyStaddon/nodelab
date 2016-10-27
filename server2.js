@@ -2,7 +2,8 @@
 // GRAB PACKAGES
 // ============================================================
 var express = require('express');
-var app = express(); 
+var getJSON = require('./getjson'); 
+var app = express();
 
 // CONFIGURE THE APP
 // ============================================================
@@ -19,7 +20,7 @@ app.set('view engine', 'ejs');
 app.get('/', function(req,res){
 
 	// pass our messages object into our template
-	res.render('pages/index', { messages: ['test1', 'test2', 'test3']  });
+	res.render('pages/index', getJSON.getJSON('hello'));
 
 });
 
