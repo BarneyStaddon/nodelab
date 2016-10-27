@@ -13,7 +13,11 @@
 		
 		<main>
 
-			<p><%= result %></p>
+			<% results.forEach(function(result) { %>
+
+				<p><%= result.primaryTitle %></p>
+
+			<% }); %>
 
 		</main>
 		
