@@ -19,6 +19,10 @@ app.set('view engine', 'ejs');
 // home page route 
 app.get('/', function(req,res){
 
+
+	// call http://fe01.museumoflondon.org.uk/solr/mol/select?q=borough:Camden&wt=json
+
+
 	// options for GET
 	var options = {
     	host : 'fe01.museumoflondon.org.uk', // here only the domain name
@@ -32,28 +36,15 @@ app.get('/', function(req,res){
 	};
 
 
+	// pass options and a callback to handle the result
 	utils.getJSON(options, (statusCode, result) => {
 
 		console.log("statusCode:" + statusCode);
 		//return { result : result };
-		res.render('pages/index', { result : 'resulttest2' });
+		res.render('pages/index', { result : result.response.docs });
 
 	});
 
-
-	// pass our messages object into our template
-	//res.render('pages/index', { result : 'resulttest' });
-	
-	/*
-
-	res.render('pages/index', utils.getJSON(options, (statusCode, result) => {
-
-		console.log("statusCode:" + statusCode);
-		return { result : result };
-
-	}));
-
-	*/
 
 });
 
